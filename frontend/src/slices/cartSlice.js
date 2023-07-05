@@ -23,11 +23,11 @@ const cartSlice = createSlice({
       if (existItem) {
         state.cartItems = state.cartItems.map(
           (currentItem) => currentItem._id === existItem._id
-            ? item
+            ? { ...currentItem, qty: currentItem.qty + item.qty }
             : currentItem
         );
       } else {
-        state.cartItems = [...state.cartItems, item]
+        state.cartItems = [...state.cartItems, item];
       }
 
       // Calculate items price
@@ -37,10 +37,10 @@ const cartSlice = createSlice({
       state.shippingPrice = addDecimals(state.itemsPrice >= 100 ? 0 : 10);
 
       // Calculate tax price (15%)
-      state.taxPrice = addDecimals((state.itemsPrice + state.shippingPrice) * 1.15);
+      state.taxPrice = addDecimals((Number(state.itemsPrice) + Number(state.shippingPrice)) * 0.15);
 
       // Calculate total price
-      state.totalPrice = addDecimals(state.itemsPrice + state.shippingPrice + state.taxPrice);
+      state.totalPrice = addDecimals(Number(state.itemsPrice) + Number(state.shippingPrice) + Number(state.taxPrice));
 
       localStorage.setItem('cart', JSON.stringify(state));
     }
