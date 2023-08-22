@@ -41,7 +41,7 @@ const OrderScreen = () => {
     }
   }, [order, paypal, paypalDispatch, loadingPayPal, errorPayPal]);
 
-  console.log(order);
+  // console.log(order);
 
   return isLoading ? <Loader /> : error ? <Message variant="danger">{error}</Message> : (
     <>
