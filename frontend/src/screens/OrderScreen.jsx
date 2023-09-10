@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useGetOrderDetailsQuery, usePayOrderMutation, useGetPayPalClientIdQuery } from '../slices/ordersApiSlice';
+import { useGetOrderDetailsQuery, usePayOrderMutation, useGetPayPalClientIdQuery, useDeliverOrderMutation } from '../slices/ordersApiSlice';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import { Button, Row, Col, ListGroup, Image, Card } from 'react-bootstrap';
@@ -12,7 +12,10 @@ const OrderScreen = () => {
   const { id: orderId } = useParams();
   const { data: order, refetch, isLoading, error } = useGetOrderDetailsQuery(orderId);
 
-  const [ payOrder, { isLoading: loadingPay } ] = usePayOrderMutation();
+  const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
+  const [deliverOrder, { isLoading: loadingDeliver }] = useDeliverOrderMutation();
+
+  // Paypal
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
   const { data: paypal, isLoading: loadingPayPal, error: errorPayPal } = useGetPayPalClientIdQuery();
 
@@ -54,12 +57,6 @@ const OrderScreen = () => {
     });
   }
 
-  const onApproveTest = async () => {
-    await payOrder({ orderId, details: { payer: {} } });
-    refetch();
-    toast.success('Payment successful');
-  }
-
   const onError = (err) => {
     toast.error(err.message);
   }
@@ -74,6 +71,16 @@ const OrderScreen = () => {
     }).then((orderId) => {
       return orderId;
     });
+  }
+
+  const deliverOrderHandler = async () => {
+    try {
+      await deliverOrder(orderId);
+      refetch();
+      toast.success('Order delievered');
+    } catch (err) {
+      toast.error(err?.data?.message || err.message);
+    }
   }
 
   return isLoading ? <Loader /> : error ? <Message variant="danger">{error}</Message> : (
@@ -182,28 +189,37 @@ const OrderScreen = () => {
                   <Col>${order.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
-                
-                {!order.isPaid && (
-                  <ListGroup.Item>
+              {!order.isPaid && (
+                <ListGroup.Item>
                   {loadingPay && <Loader />}
                   {isPending ? <Loader /> : (
                     <div>
-                      {/*
-                        TESTING ONLY: Used to set order to paid skipping any PayPal interaction
-                        <Button onClick={onApproveTest} style={{ marginBottom: '10px' }}>Test Pay Order</Button>
-                      */}
-                      <div>
-                        <PayPalButtons
-                          createOrder={createOrder}
-                          onApprove={onApprove}
-                          onError={onError}
-                        />
-                      </div>
+                      <PayPalButtons
+                        createOrder={createOrder}
+                        onApprove={onApprove}
+                        onError={onError}
+                      />
                     </div>
                   )}
+                </ListGroup.Item>
+              )}
+              {
+                loadingDeliver && <Loader />
+              }
+              {
+                // Mark as delivered
+                userInfo && userInfo.isAdmin && order.isPaid && !order.isDelivered && (
+                  <ListGroup.Item>
+                    <Button
+                      type='button'
+                      className='btn btn-block'
+                      onClick={deliverOrderHandler}
+                    >
+                      Deliver
+                    </Button>
                   </ListGroup.Item>
-                )}
-              {/* MARK AS DELIVERED PLACEHOLDER */}
+                )
+              }
             </ListGroup>
           </Card>
         </Col>
