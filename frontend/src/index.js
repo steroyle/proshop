@@ -47,6 +47,7 @@ const router = createBrowserRouter(
       <Route path="" element={<AdminRoute />} >
         <Route path="/admin/orderlist" element={<OrderListScreen />}></Route>
         <Route path="/admin/productlist" element={<ProductListScreen />}></Route>
+        <Route path="/admin/productlist/:pageNumber" element={<ProductListScreen />}></Route>
         <Route path="/admin/product/:id/edit" element={<ProductEditScreen />}></Route>
         <Route path="/admin/userlist" element={<UserListScreen />}></Route>
         <Route path="/admin/user/:id/edit" element={<UserEditScreen />}></Route>
