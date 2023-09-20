@@ -4,7 +4,6 @@ import { Form, Button } from "react-bootstrap";
 import Message from "../../components/Message";
 import Loader from "../../components/Loader";
 import FormContainer from "../../components/FormContainer";
-import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useUpdateProductMutation, useGetProductDetailsQuery, useUploadProductImageMutation } from "../../slices/productsApiSlice";
 
@@ -120,7 +119,8 @@ const ProductEditScreen = () => {
                       onChange={ uploadFileHandler }
                     >
                     </Form.Control>
-                  </Form.Group>                  
+                  </Form.Group>
+                  {loadingUpload && <Loader />}
                   <Form.Group controlId="brand">
                     <Form.Label>Brand</Form.Label>
                     <Form.Control
